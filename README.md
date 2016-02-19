@@ -18,7 +18,7 @@ Supported versions:
 
 Use the `go` command:
 
-	$ go get github.com/satori/go.uuid
+	$ go get github.com/galexrt/go.uuid
 
 ## Requirements
 
@@ -31,7 +31,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/satori/go.uuid"
+	"github.com/galexrt/go.uuid"
 )
 
 func main() {

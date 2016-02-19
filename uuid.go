@@ -80,29 +80,35 @@ var (
 	byteGroups = []int{8, 4, 4, 4, 12}
 )
 
-func initClockSequence() {
+func initClockSequence() error {
 	buf := make([]byte, 2)
-	safeRandom(buf)
+	if err := safeRandom(buf); err != nil {
+		return err
+	}
 	clockSequence = binary.BigEndian.Uint16(buf)
+	return nil
 }
 
-func initHardwareAddr() {
+func initHardwareAddr() error {
 	interfaces, err := net.Interfaces()
 	if err == nil {
 		for _, iface := range interfaces {
 			if len(iface.HardwareAddr) >= 6 {
 				copy(hardwareAddr[:], iface.HardwareAddr)
-				return
+				return nil
 			}
 		}
 	}
 
 	// Initialize hardwareAddr randomly in case
 	// of real network interfaces absence
-	safeRandom(hardwareAddr[:])
+	if err := safeRandom(hardwareAddr[:]); err != nil {
+		return err
+	}
 
 	// Set multicast bit as recommended in RFC 4122
 	hardwareAddr[0] |= 0x01
+	return nil
 }
 
 func initStorage() {
@@ -110,10 +116,11 @@ func initStorage() {
 	initHardwareAddr()
 }
 
-func safeRandom(dest []byte) {
+func safeRandom(dest []byte) error {
 	if _, err := rand.Read(dest); err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 }
 
 // Returns difference in 100-nanosecond intervals between
@@ -406,13 +413,15 @@ func NewV3(ns UUID, name string) UUID {
 }
 
 // NewV4 returns random generated UUID.
-func NewV4() UUID {
+func NewV4() (UUID, error) {
 	u := UUID{}
-	safeRandom(u[:])
+	if err := safeRandom(u[:]); err != nil {
+		return u, err
+	}
 	u.SetVersion(4)
 	u.SetVariant()
 
-	return u
+	return u, nil
 }
 
 // NewV5 returns UUID based on SHA-1 hash of namespace UUID and name.
